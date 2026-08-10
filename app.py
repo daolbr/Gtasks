@@ -53,8 +53,9 @@ class FloatingWidget:
         self.header = tk.Frame(root, bg="#11111b", height=30)
         self.header.pack(fill="x", side="top")
         
+        # CORREÇÃO AQUI: pady=5 ao invés de py=5
         self.title_label = tk.Label(self.header, text="📌 Tarefas Pendentes", fg="#cdd6f4", bg="#11111b", font=("Segoe UI", 9, "bold"))
-        self.title_label.pack(side="left", padx=10, py=5)
+        self.title_label.pack(side="left", padx=10, pady=5)
 
         # Botão Fechar
         self.close_btn = tk.Label(self.header, text="✕", fg="#f38ba8", bg="#11111b", font=("Segoe UI", 10, "bold"), cursor="hand2")
