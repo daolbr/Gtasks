@@ -67,7 +67,7 @@ class FloatingWidget:
 
         # Body
         self.container = tk.Frame(root, bg="#1e1e2e")
-        self.container.pack(fill="both", expand=True, padx=10, py=10)
+        self.container.pack(fill="both", expand=True, padx=10, pady=10)
 
         self.canvas = tk.Canvas(self.container, bg="#1e1e2e", highlightthickness=0)
         self.scrollbar = ttk.Scrollbar(self.container, orient="vertical", command=self.canvas.yview)
@@ -100,7 +100,7 @@ class FloatingWidget:
             widget.destroy()
 
         loading_label = tk.Label(self.scrollable_frame, text="Carregando...", fg="#a6adc8", bg="#1e1e2e", font=("Segoe UI", 9, "italic"))
-        loading_label.pack(anchor="w", py=5)
+        loading_label.pack(anchor="w", pady=5)
         self.root.update()
 
         tasks = fetch_pending_tasks()
@@ -108,7 +108,7 @@ class FloatingWidget:
 
         if not tasks:
             no_tasks_label = tk.Label(self.scrollable_frame, text="Nenhuma tarefa pendente! 🎉", fg="#a6e3a1", bg="#1e1e2e", font=("Segoe UI", 9))
-            no_tasks_label.pack(anchor="w", py=5)
+            no_tasks_label.pack(anchor="w", pady=5)
             return
 
         for task in tasks:
