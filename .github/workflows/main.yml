@@ -28,5 +28,5 @@ jobs:
     - name: Guardar o executável
       uses: actions/upload-artifact@v4
       with:
-        name: GoogleTasksWidget-v2
+        name: GoogleTasksWidget-v3
         path: dist/app.exe
