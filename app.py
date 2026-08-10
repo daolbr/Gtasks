@@ -9,7 +9,6 @@ from googleapiclient.discovery import build
 SCOPES = ['https://www.googleapis.com/auth/tasks.readonly']
 
 def get_tasks_service():
-    """Autentica com o Google e retorna o serviço da API."""
     creds = None
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
@@ -24,7 +23,6 @@ def get_tasks_service():
     return build('tasks', 'v1', credentials=creds)
 
 def fetch_pending_tasks():
-    """Busca tarefas pendentes na lista padrão."""
     try:
         service = get_tasks_service()
         results = service.tasks().list(tasklist='@default', showCompleted=False).execute()
@@ -38,46 +36,39 @@ class FloatingWidget:
         self.root = root
         self.root.title("Google Tasks")
         
-        # Configuração da Janela
         self.root.geometry("280x380+100+100")
-        self.root.overrideredirect(True)       # Remove bordas/barra de título padrão
-        self.root.wm_attributes("-topmost", True) # Mantém sempre no topo
-        self.root.attributes("-alpha", 0.92)    # Transparência leve (92%)
-        self.root.configure(bg="#1e1e2e")      # Estilo Dark Mode
+        self.root.overrideredirect(True)
+        self.root.wm_attributes("-topmost", True)
+        self.root.attributes("-alpha", 0.92)
+        self.root.configure(bg="#1e1e2e")
 
-        # Variáveis de arraste
         self._x = 0
         self._y = 0
 
-        # Barra de título personalizada (Drag Bar)
+        # Header
         self.header = tk.Frame(root, bg="#11111b", height=30)
         self.header.pack(fill="x", side="top")
         
-        # CORREÇÃO AQUI: pady=5 ao invés de py=5
         self.title_label = tk.Label(self.header, text="📌 Tarefas Pendentes", fg="#cdd6f4", bg="#11111b", font=("Segoe UI", 9, "bold"))
         self.title_label.pack(side="left", padx=10, pady=5)
 
-        # Botão Fechar
         self.close_btn = tk.Label(self.header, text="✕", fg="#f38ba8", bg="#11111b", font=("Segoe UI", 10, "bold"), cursor="hand2")
         self.close_btn.pack(side="right", padx=10)
         self.close_btn.bind("<Button-1>", lambda e: root.destroy())
 
-        # Botão Recarregar
         self.refresh_btn = tk.Label(self.header, text="🔄", fg="#a6e3a1", bg="#11111b", font=("Segoe UI", 9), cursor="hand2")
         self.refresh_btn.pack(side="right", padx=5)
         self.refresh_btn.bind("<Button-1>", lambda e: self.load_tasks())
 
-        # Eventos para arrastar a janela
         self.header.bind("<Button-1>", self.start_move)
         self.header.bind("<B1-Motion>", self.do_move)
         self.title_label.bind("<Button-1>", self.start_move)
         self.title_label.bind("<B1-Motion>", self.do_move)
 
-        # Container das Tarefas
+        # Body
         self.container = tk.Frame(root, bg="#1e1e2e")
         self.container.pack(fill="both", expand=True, padx=10, py=10)
 
-        # Lista com Scroll
         self.canvas = tk.Canvas(self.container, bg="#1e1e2e", highlightthickness=0)
         self.scrollbar = ttk.Scrollbar(self.container, orient="vertical", command=self.canvas.yview)
         self.scrollable_frame = tk.Frame(self.canvas, bg="#1e1e2e")
@@ -93,7 +84,6 @@ class FloatingWidget:
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
 
-        # Carregar tarefas iniciais
         self.load_tasks()
 
     def start_move(self, event):
@@ -106,7 +96,6 @@ class FloatingWidget:
         self.root.geometry(f"+{x}+{y}")
 
     def load_tasks(self):
-        # Limpa tarefas anteriores da tela
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
 
