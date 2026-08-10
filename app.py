@@ -1,4 +1,5 @@
 import os
+import sys
 import tkinter as tk
 from tkinter import ttk
 from google.auth.transport.requests import Request
@@ -6,20 +7,27 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-# Escopo atualizado para permitir criar e concluir tarefas
 SCOPES = ['https://www.googleapis.com/auth/tasks']
+
+def get_token_path():
+    """Gera um caminho seguro na pasta APPDATA para não ter erros de permissão."""
+    app_dir = os.path.join(os.environ.get('APPDATA', os.path.expanduser('~')), 'GoogleTasksWidget')
+    os.makedirs(app_dir, exist_ok=True)
+    return os.path.join(app_dir, 'token.json')
 
 def get_tasks_service():
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    token_path = get_token_path()
+
+    if os.path.exists(token_path):
+        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
+        with open(token_path, 'w') as token:
             token.write(creds.to_json())
     return build('tasks', 'v1', credentials=creds)
 
@@ -57,14 +65,19 @@ class FloatingWidget:
         
         self.root.geometry("300x420+100+100")
         self.root.overrideredirect(True)
-        self.root.wm_attributes("-topmost", True)
+        
+        # AJUSTE PARA FICAR ATRÁS DE OUTRAS JANELAS:
+        self.root.wm_attributes("-topmost", False)  # Desativa ficar no topo
+        self.root.lower()                           # Manda para a camada do fundo
+        self.root.bind("<FocusOut>", lambda e: self.root.lower()) # Se perder foco, volta pro fundo
+
         self.root.attributes("-alpha", 0.95)
         self.root.configure(bg="#1e1e2e")
 
         self._x = 0
         self._y = 0
 
-        # Header (Barra Superior)
+        # Header
         self.header = tk.Frame(root, bg="#11111b", height=30)
         self.header.pack(fill="x", side="top")
         
@@ -84,7 +97,7 @@ class FloatingWidget:
         self.title_label.bind("<Button-1>", self.start_move)
         self.title_label.bind("<B1-Motion>", self.do_move)
 
-        # Área de Adicionar Nova Tarefa
+        # Adicionar tarefa
         self.add_frame = tk.Frame(root, bg="#1e1e2e")
         self.add_frame.pack(fill="x", padx=10, pady=(10, 5))
 
@@ -95,7 +108,7 @@ class FloatingWidget:
         self.add_btn = tk.Button(self.add_frame, text="+", bg="#89b4fa", fg="#11111b", font=("Segoe UI", 10, "bold"), relief="flat", cursor="hand2", command=self.handle_add_task)
         self.add_btn.pack(side="right", ipadx=6)
 
-        # Corpo do Widget (Lista com Scroll)
+        # Lista
         self.container = tk.Frame(root, bg="#1e1e2e")
         self.container.pack(fill="both", expand=True, padx=10, pady=(5, 10))
 
@@ -157,7 +170,6 @@ class FloatingWidget:
             task_frame = tk.Frame(self.scrollable_frame, bg="#313244", padx=8, pady=6)
             task_frame.pack(fill="x", expand=True, pady=3)
 
-            # Caixa para Concluir Tarefa
             if task['id']:
                 check_btn = tk.Label(task_frame, text="☐", fg="#89b4fa", bg="#313244", font=("Segoe UI", 11, "bold"), cursor="hand2")
                 check_btn.pack(side="left", anchor="n", padx=(0, 5))
